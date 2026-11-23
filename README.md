@@ -11,7 +11,7 @@ Trabalho da disciplina **Algorithmic Thinking & Introduction to Object-Oriented 
 ## Como executar
 
 ```bash
-git clone <URL-do-repositório>
+git clone https://github.com/felipe-008/rentsmart.git
 cd rentsmart
 python main.py
 ```
