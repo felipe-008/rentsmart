@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>RentSmart — Parte Teórica</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  body { font-family: "Segoe UI", Arial, sans-serif; font-size: 11pt; line-height: 1.45; color: #1a1a1a; }
+  h1 { font-size: 20pt; margin: 0 0 4px; }
+  h2 { font-size: 14pt; border-bottom: 2px solid #1a1a1a; padding-bottom: 3px; margin-top: 22px; }
+  h3 { font-size: 11.5pt; margin: 14px 0 4px; }
+  table { border-collapse: collapse; width: 100%; margin: 6px 0; font-size: 10pt; }
+  th, td { border: 1px solid #999; padding: 4px 6px; text-align: left; vertical-align: top; }
+  th { background: #eee; }
+  code, pre { font-family: Consolas, monospace; font-size: 9.5pt; }
+  pre { background: #f4f4f4; padding: 8px; border: 1px solid #ddd; white-space: pre-wrap; }
+  .capa { text-align: center; padding-top: 70mm; page-break-after: always; }
+  .capa p { margin: 6px 0; }
+  .quebra { page-break-before: always; }
+  svg text { font-family: "Segoe UI", Arial, sans-serif; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="capa">
+  <h1>RentSmart</h1>
+  <p style="font-size:14pt">Sistema de Orçamento de Locação com Python e Orientação a Objetos</p>
+  <p style="margin-top:30px">Parte Teórica</p>
+  <p>Disciplina: Algorithmic Thinking &amp; Introduction to Object-Oriented Programming</p>
+  <p style="margin-top:40px">Aluno: Felipe Campos Avila</p>
+  <p>2026</p>
+</div>
+
+<h2>1. Análise do problema e das regras de negócio</h2>
+<p>A R.M Imóveis calcula seus orçamentos de locação à mão, o que deixa o atendimento lento e abre espaço para erros na aplicação de adicionais, descontos e condições do contrato. O RentSmart automatiza esse cálculo: recebe as características da locação, aplica as regras da imobiliária, mostra como o valor foi formado e gera a projeção dos pagamentos do primeiro ano.</p>
+<table>
+  <tr><th>Imóvel</th><th>Aluguel-base</th><th>Adicionais</th><th>Desconto</th></tr>
+  <tr><td>Apartamento</td><td>R$ 700,00</td><td>2 quartos: +R$ 200,00<br>Garagem: +R$ 300,00</td><td>5% para quem não possui crianças, aplicado depois dos adicionais</td></tr>
+  <tr><td>Casa</td><td>R$ 900,00</td><td>2 quartos: +R$ 250,00<br>Garagem: +R$ 300,00</td><td>—</td></tr>
+  <tr><td>Estúdio</td><td>R$ 1.200,00</td><td>Pacote de 2 vagas: R$ 250,00<br>Cada vaga extra: +R$ 60,00</td><td>—</td></tr>
+</table>
+<p><b>Taxa contratual:</b> R$ 2.000,00, paga em 1 a 5 parcelas. Ela é um custo separado do aluguel e aparece separada no resumo e no CSV.</p>
+<p><b>Interpretações adotadas</b> (o enunciado deixa margem):</p>
+<ul>
+  <li>O desconto de 5% incide sobre o aluguel já somado aos adicionais (2º quarto e garagem), conforme o texto "após a aplicação dos adicionais correspondentes".</li>
+  <li>O estúdio não tem opção de 2 quartos e só aceita estacionamento a partir do pacote de 2 vagas; não há contratação de 1 vaga isolada.</li>
+  <li>Quando R$ 2.000,00 não se divide em centavos exatos (3 parcelas), a última parcela absorve a diferença: 666,67 + 666,67 + 666,66. Assim a soma é sempre R$ 2.000,00.</li>
+  <li>Na projeção de 12 meses, as parcelas da taxa são cobradas nos primeiros meses, junto com o aluguel.</li>
+</ul>
+
+<h2>2. Entradas, processamento e saídas</h2>
+<table>
+  <tr><th style="width:33%">Entradas</th><th style="width:34%">Processamento</th><th>Saídas</th></tr>
+  <tr>
+    <td>Tipo do imóvel (A, C ou E)<br>Quartos (1 ou 2) — casa e apartamento<br>Vaga de garagem (S/N) — casa e apartamento<br>Possui crianças (S/N) — apartamento<br>Estacionamento (S/N) e vagas extras (0 a 10) — estúdio<br>Parcelas da taxa contratual (1 a 5)</td>
+    <td>Validar cada entrada e repetir a pergunta se for inválida<br>Somar aluguel-base e adicionais<br>Aplicar desconto de 5% quando cabível<br>Dividir a taxa contratual nas parcelas, ajustando centavos<br>Montar a projeção mês a mês (aluguel + parcela)</td>
+    <td>Resumo detalhado no terminal: cada item do aluguel, total mensal, taxa contratual e parcelamento, total previsto em 12 meses<br>Arquivo <code>projecao_12_meses.csv</code> com mês, aluguel, parcela do contrato e total do mês</td>
+  </tr>
+</table>
+
+<h2 class="quebra">3. Fluxograma</h2>
+<svg width="680" height="1060" viewBox="0 0 700 1090" xmlns="http://www.w3.org/2000/svg">
+  <defs><marker id="s" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#1a1a1a"/></marker></defs>
+  <g fill="#fff" stroke="#1a1a1a" stroke-width="1.5">
+    <ellipse cx="350" cy="40" rx="60" ry="22"/>
+    <rect x="200" y="90" width="300" height="44" rx="4"/>
+    <polygon points="350,160 440,200 350,240 260,200"/>
+    <polygon points="350,260 440,300 350,340 260,300"/>
+    <rect x="430" y="360" width="260" height="60" rx="4"/>
+    <rect x="20" y="360" width="260" height="44" rx="4"/>
+    <polygon points="150,434 230,470 150,506 70,470"/>
+    <rect x="40" y="540" width="220" height="40" rx="4"/>
+    <rect x="200" y="640" width="300" height="44" rx="4"/>
+    <rect x="160" y="710" width="380" height="44" rx="4"/>
+    <rect x="160" y="780" width="380" height="44" rx="4"/>
+    <rect x="200" y="850" width="300" height="44" rx="4"/>
+    <rect x="200" y="920" width="300" height="44" rx="4"/>
+    <ellipse cx="350" cy="1010" rx="60" ry="22"/>
+  </g>
+  <g fill="none" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#s)">
+    <path d="M350,62 V90"/>
+    <path d="M350,134 V160"/>
+    <path d="M260,200 H150 V112 H200"/>
+    <path d="M350,240 V260"/>
+    <path d="M440,300 H560 V360"/>
+    <path d="M260,300 H150 V360"/>
+    <path d="M150,404 V434"/>
+    <path d="M150,506 V540"/>
+    <path d="M150,580 V615 H350 V640"/>
+    <path d="M230,470 H320 V615"/>
+    <path d="M560,420 V615 H350"/>
+    <path d="M350,684 V710"/>
+    <path d="M350,754 V780"/>
+    <path d="M350,824 V850"/>
+    <path d="M350,894 V920"/>
+    <path d="M350,964 V988"/>
+  </g>
+  <g text-anchor="middle" fill="#1a1a1a">
+    <text x="350" y="45">Início</text>
+    <text x="350" y="117">Exibir tipos e ler o tipo (A/C/E)</text>
+    <text x="350" y="205">Tipo válido?</text>
+    <text x="350" y="305">É estúdio?</text>
+    <text x="560" y="385">Estacionamento? (S/N)</text>
+    <text x="560" y="405">Se S: 2 vagas + extras (0 a 10)</text>
+    <text x="150" y="387">Ler quartos (1-2) e garagem (S/N)</text>
+    <text x="150" y="475">Apartamento?</text>
+    <text x="150" y="565">Ler: possui crianças? (S/N)</text>
+    <text x="350" y="667">Ler parcelas da taxa contratual (1 a 5)</text>
+    <text x="350" y="737">Imóvel calcula aluguel: base + adicionais − desconto</text>
+    <text x="350" y="807">Contrato divide R$ 2.000 (última parcela ajusta centavos)</text>
+    <text x="350" y="877">Orçamento exibe o resumo detalhado</text>
+    <text x="350" y="947">Orçamento gera projecao_12_meses.csv</text>
+    <text x="350" y="1015">Fim</text>
+  </g>
+  <g font-weight="bold" fill="#1a1a1a">
+    <text x="160" y="192">Não</text>
+    <text x="360" y="254">Sim</text>
+    <text x="470" y="292">Sim</text>
+    <text x="200" y="292">Não</text>
+    <text x="158" y="526">Sim</text>
+    <text x="250" y="462">Não</text>
+  </g>
+  <text x="350" y="1070" text-anchor="middle" font-style="italic" fill="#444">Toda leitura (quartos, S/N, vagas, parcelas) repete a pergunta até receber um valor válido, como no laço "Tipo válido?".</text>
+</svg>
+
+<h2 class="quebra">4. Estrutura de classes</h2>
+<pre>
+Imovel  (abstrata)                     Contrato
+├─ ImovelComGaragem                    Orcamento ── usa ──> Imovel, Contrato
+│   ├─ Apartamento
+│   └─ Casa
+└─ Estudio
+</pre>
+<table>
+  <tr><th style="width:20%">Classe</th><th style="width:38%">Atributos</th><th>Métodos</th></tr>
+  <tr><td><b>Imovel</b> (abstrata)</td><td><code>tipo</code>, <code>aluguel_base</code>, <code>quartos</code></td><td><code>adicionais()</code> (abstrato), <code>desconto(subtotal)</code> (padrão 0), <code>itens()</code> monta base + adicionais + desconto, <code>aluguel_mensal()</code></td></tr>
+  <tr><td><b>ImovelComGaragem</b></td><td><code>adicional_segundo_quarto</code>, <code>valor_garagem</code> = 300, <code>garagem</code></td><td><code>adicionais()</code>: 2º quarto e garagem — regra comum a casa e apartamento</td></tr>
+  <tr><td><b>Apartamento</b></td><td><code>aluguel_base</code> = 700, adicional 2º quarto = 200, <code>taxa_desconto</code> = 5%, <code>possui_criancas</code></td><td><code>desconto(subtotal)</code>: 5% quando não há crianças</td></tr>
+  <tr><td><b>Casa</b></td><td><code>aluguel_base</code> = 900, adicional 2º quarto = 250</td><td>herda tudo; só muda os valores</td></tr>
+  <tr><td><b>Estudio</b></td><td><code>aluguel_base</code> = 1200, <code>valor_pacote</code> = 250, <code>vagas_no_pacote</code> = 2, <code>valor_vaga_extra</code> = 60, <code>vagas</code></td><td><code>adicionais()</code>: pacote de estacionamento e vagas extras</td></tr>
+  <tr><td><b>Contrato</b></td><td><code>TAXA</code> = 2000, <code>MAX_PARCELAS</code> = 5, <code>parcelas</code></td><td><code>valor_parcela(mes)</code>: parcela devida no mês, 0 depois da última</td></tr>
+  <tr><td><b>Orcamento</b></td><td><code>imovel</code>, <code>contrato</code>, <code>MESES</code> = 12</td><td><code>projecao()</code>, <code>resumo()</code>, <code>exportar_csv(caminho)</code></td></tr>
+</table>
+<p>O arquivo <code>main.py</code> é só a interface: funções <code>perguntar_opcao</code>, <code>perguntar_inteiro</code> e <code>coletar_imovel</code> leem e validam as entradas, criam os objetos e chamam o orçamento. Nenhuma regra de preço fica na interface.</p>
+
+<h2>5. Pensamento algorítmico e Orientação a Objetos na solução</h2>
+<h3>Pensamento algorítmico</h3>
+<ul>
+  <li><b>Decomposição:</b> o problema foi quebrado em três partes independentes — coletar dados, calcular o aluguel e calcular o contrato/projeção — cada uma num lugar do código.</li>
+  <li><b>Reconhecimento de padrões:</b> casa e apartamento seguem a mesma regra (2º quarto + garagem), só com valores diferentes. Esse padrão virou a classe <code>ImovelComGaragem</code>, em vez de dois blocos <code>if</code> repetidos.</li>
+  <li><b>Abstração:</b> todo imóvel é "base + adicionais − desconto". O cálculo final é um só (<code>itens()</code> e <code>aluguel_mensal()</code>); cada tipo só informa o que muda.</li>
+  <li><b>Algoritmo:</b> a sequência do fluxograma — ler e validar em laço, decidir pelo tipo, calcular, exibir e gravar — é exatamente a ordem do <code>main()</code>.</li>
+</ul>
+<h3>Orientação a Objetos</h3>
+<ul>
+  <li><b>Herança:</b> <code>Apartamento</code> e <code>Casa</code> herdam de <code>ImovelComGaragem</code>, que herda de <code>Imovel</code>. Os valores ficam em atributos de classe, então a <code>Casa</code> não precisa de nenhum método próprio.</li>
+  <li><b>Polimorfismo:</b> <code>Orcamento</code> chama <code>imovel.itens()</code> sem saber o tipo do imóvel; cada classe responde com seus próprios adicionais e descontos. Um novo tipo de imóvel entra sem mudar o orçamento.</li>
+  <li><b>Encapsulamento e validação:</b> cada objeto valida seus dados no construtor (quartos 1 ou 2, vagas do estúdio, parcelas de 1 a 5) e lança <code>ValueError</code> se algo estiver errado; a interface ainda repete a pergunta antes disso.</li>
+  <li><b>Responsabilidade separada:</b> aluguel (Imovel), taxa (Contrato) e apresentação/CSV (Orcamento) ficam em classes diferentes, por isso aluguel mensal e taxa de contrato nunca se misturam no resumo.</li>
+</ul>
+<h3>Testes</h3>
+<p>O arquivo <code>test_rentsmart.py</code> confere os valores de cada tipo de imóvel, o desconto, as validações, a soma das parcelas (sempre R$ 2.000,00) e o conteúdo do CSV. Execução: <code>python -m unittest -v</code> (6 testes, todos passando).</p>
+
+<h2>6. Exemplo de execução</h2>
+<p>Apartamento, 2 quartos, com garagem, sem crianças, taxa em 3 vezes:</p>
+<pre>  Aluguel-base (Apartamento)               R$ 700,00
+  Adicional 2 quartos                      R$ 200,00
+  Vaga de garagem                          R$ 300,00
+  Desconto 5% (sem crianças)               -R$ 60,00
+  TOTAL ALUGUEL MENSAL                   R$ 1.140,00
+Taxa contratual (cobrada à parte do aluguel):
+  Valor da taxa                          R$ 2.000,00
+  Parcelamento                                    3x
+  Valor da parcela                         R$ 666,67
+  Última parcela (ajuste centavos)         R$ 666,66
+  Total previsto em 12 meses            R$ 15.680,00</pre>
+<table>
+  <tr><th>Mês</th><th>Aluguel</th><th>Parcela contrato</th><th>Total do mês</th></tr>
+  <tr><td>1</td><td>1.140,00</td><td>666,67</td><td>1.806,67</td></tr>
+  <tr><td>2</td><td>1.140,00</td><td>666,67</td><td>1.806,67</td></tr>
+  <tr><td>3</td><td>1.140,00</td><td>666,66</td><td>1.806,66</td></tr>
+  <tr><td>4 a 12</td><td>1.140,00</td><td>0,00</td><td>1.140,00</td></tr>
+</table>
+</body>
+</html>
