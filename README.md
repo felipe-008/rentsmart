@@ -4,6 +4,8 @@ Aplicação de terminal em Python que calcula o orçamento de locação da R.M I
 
 Trabalho da disciplina **Algorithmic Thinking & Introduction to Object-Oriented Programming**.
 
+🎥 Vídeo pitch: https://youtu.be/3TI2eH1Kdfc
+
 ## Requisitos
 
 - Python 3.8 ou superior (só biblioteca padrão, nada para instalar).
